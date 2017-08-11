@@ -96,6 +96,20 @@ public class RSA {
 		return new String(Base64.encodeBase64(b1),
 				ConfigureEncryptAndDecrypt.CHAR_ENCODING);
 	}
+	
+	/**
+	 * 加密方法 source： 源数据
+	 */
+	public static String encrypt(String source) throws Exception {
+		Key key = getPublicKey("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC+nuhWdPzTcm3TSqru8o/bqXdgmhrIbOUqnGQYpjm3Rb44ZfYvhyTP+WOjPwpDxukKFXQRZFvMos4AdH6Zi3TZfw7aJmPC6G1ePCbH7VFk5SNODX/JHVSR5Pvjf4su8p9/d7Zj8RvIm8h39xT+2zlojrvYc58c4Xsuo3RNjlj4qQIDAQAB");
+		/** 得到Cipher对象来实现对源数据的RSA加密 */
+		Cipher cipher = Cipher.getInstance(ConfigureEncryptAndDecrypt.RSA_ALGORITHM);
+		cipher.init(Cipher.ENCRYPT_MODE, key);
+		byte[] b = source.getBytes();
+		/** 执行加密操作 */
+		byte[] b1 = cipher.doFinal(b);
+		return new String(Base64.encodeBase64(b1), ConfigureEncryptAndDecrypt.CHAR_ENCODING);
+	}
 
 	/**
 	 * 解密算法 cryptograph:密文

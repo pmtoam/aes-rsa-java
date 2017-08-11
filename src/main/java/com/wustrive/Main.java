@@ -59,13 +59,42 @@ public class Main
 												"9fJ/1xqnpo1tgRcv4wIDAQAB";
 	
 	public static void main(String[] args) throws Exception {
-		TreeMap<String, Object> params = new TreeMap<String, Object>();
-		params.put("userid", "152255855");
-		params.put("phone", "18965621420");
+//		TreeMap<String, Object> params = new TreeMap<String, Object>();
+//		params.put("userid", "152255855");
+//		params.put("phone", "18965621420");
+//		
+//		clientPmtoam(params);
+////		client(params);
+//		
+//		serverPmtoam();
 		
-		client(params);
+		String encrypted = RSA.encrypt("18116136307");
+		System.out.println(encrypted);
 		
-		server();
+		System.out.println(RSA.decrypt(encrypted, "PRIVATE_KEY"));
+	}
+	
+	public static void clientPmtoam(TreeMap<String, Object> params) throws Exception{
+		// 生成RSA签名
+//		String sign = EncryUtil.handleRSA(params, clientPrivateKey);
+//		params.put("sign", sign);
+		
+		String info = JSON.toJSONString(params);
+		
+		// 随机生成AES密钥
+		String aesKey = RandomUtil.getRandom(16);
+		
+		// AES加密数据
+		String data = AES.encryptToBase64(info, aesKey);
+		
+		// 使用RSA算法将商户自己随机生成的AESkey加密
+		String encryptkey = RSA.encrypt(aesKey, serverPublicKey);
+		
+		Req.data = data;
+		Req.encryptkey = encryptkey;
+		
+		System.out.println("加密后的请求数据:\n" + new Req().toString());
+		
 	}
 	
 	public static void client(TreeMap<String, Object> params) throws Exception{
@@ -86,6 +115,28 @@ public class Main
 		Req.encryptkey = encryptkey;
 		
 		System.out.println("加密后的请求数据:\n" + new Req().toString());
+	}
+	
+	public static void serverPmtoam() throws Exception {
+		
+		// 验签
+//		boolean passSign = EncryUtil.checkDecryptAndSign(Req.data, Req.encryptkey, clientPublicKey, serverPrivateKey);
+		
+//		if (passSign) { // 验签通过
+			
+			String aeskey = RSA.decrypt(Req.encryptkey, serverPrivateKey);
+			
+			String data = AES.decryptFromBase64(Req.data, aeskey);
+			
+			JSONObject jsonObj = JSONObject.parseObject(data);
+			String userid = jsonObj.getString("userid");
+			String phone = jsonObj.getString("phone");
+			
+			System.out.println("解密后的明文: userid:" + userid + ", phone: "+phone);
+			
+//		} else {
+//			System.out.println("验签失败");
+//		}
 	}
 	
 	public static void server() throws Exception {
